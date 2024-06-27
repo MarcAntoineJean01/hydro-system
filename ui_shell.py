@@ -11,13 +11,12 @@ except Exception  as e:
 	print(e)
 	print("something went wrong with dependecies, check out the README file")
 	sys.exit()
-import time
 class UI_Shell:
 
 	def __init__(self):
 		try:
 			self.app = App(title="My app", width=800, height=480)
-			self.app.full_screen = True if sys.platform == "RASP_PI" else False
+			self.app.full_screen=True if sys.platform == "RASP_PI" else False
 			self.welcome_screen()
 
 			self.app.display()
@@ -28,33 +27,46 @@ class UI_Shell:
 
 #SCREENS
 	def welcome_screen(self):
-		self.title_box = TitleBox(self.app, text="Welcome", layout="auto", height='fill', width='fill')
+		self.title_box=TitleBox(self.app, text="Welcome", layout="auto", height='fill', width='fill')
 
-		welcome_text = "Hello and welcome! press the start button to start up app, first we're going to make sure everything is set up to run smoothly!"
-		self.welcome_text = Text(self.title_box, text=welcome_text)
-		self.main_app_button = PushButton(self.title_box, self.check_screen, text='Start')
-		self.exit_button = PushButton(self.title_box, self.exit_app, text='Exit')
+		welcome_text="Hello and welcome! press the start button to start up app, first we're going to make sure everything is set up to run smoothly!"
+		self.welcome_text=Text(self.title_box, text=welcome_text)
+		self.main_app_button=PushButton(self.title_box, self.check_screen, text='Start')
+		self.exit_button=PushButton(self.title_box, self.exit_app, text='Exit')
 
 	def check_screen(self):
 		self.title_box.destroy()
 
-		self.title_box = TitleBox(self.app, text="Start-up", layout="auto", height='fill', width='fill')
-		self.packages_state_text = Text(self.title_box, text='Checking packages: WORKING', color='red', size=14)
-		self.libraries_state_text = Text(self.title_box, text='Checking libraries: WAITING', color='yellow', size=14)
+		self.title_box=TitleBox(self.app, text="Start-up", layout="auto", height='fill', width='fill')
+		self.packages_state_text=Text(self.title_box, text='Checking packages: WORKING', color='red', size=14)
+		self.libraries_state_text=Text(self.title_box, text='Checking libraries: WAITING', color='yellow', size=14)
+		self.sensors_state_text=Text(self.title_box, text='Checking sensors: WAITING', color='yellow', size=14)
+		self.database_state_text=Text(self.title_box, text='Checking database: WAITING', color='yellow', size=14)
 		self.app.update()
 
 		self.check_packages()
-		self.packages_state_text.value='Checking packages: DONE'
-		self.packages_state_text.text_color='green'
 
 		self.libraries_state_text.value='Checking libraries: WORKING'
 		self.libraries_state_text.text_color='red'
 		self.app.update()
 
 		self.check_libraries()
-		self.libraries_state_text.value='Checking libraries: DONE'
-		self.libraries_state_text.text_color='green'
+
+		self.sensors_state_text.value='Checking sensors: WORKING'
+		self.sensors_state_text.text_color='red'
 		self.app.update()
+
+		self.check_sensors()
+
+		self.database_state_text.value='Checking sensors: WORKING'
+		self.database_state_text.text_color='red'
+		self.app.update()
+
+		self.check_database()
+
+		self.app.update()
+
+
 
 
 #METHODS
@@ -62,25 +74,29 @@ class UI_Shell:
 		sys.exit()
 
 	def check_packages(self):
-		time.sleep(2)
 		try:
-			all_good = True
+			all_good=True
 			print("checking packages")
-			data = subprocess.check_output(["pip", "list", "--format", "json"])
+			data=subprocess.check_output(["pip", "list", "--format", "json"])
 			parsed_results = json.loads(data)
 
 			for pack in nakama_dependency_list.packages:
 				if any(installed["name"] == pack[0] for installed in parsed_results): 
 					print(f"done checking {pack[0]}")
 				else:
-					all_good = False
+					all_good=False
 					print(f"couldn't find package {pack[0]}, attempting install.")
-					cmd = f"pip install {pack[0]}"
+					cmd=f"pip install {pack[0]}"
 					open_process = subprocess.Popen(shlex.split(cmd))
 					open_process.wait()
-					print(f"done installing {pack[0]}")
+					if open_process.returncode != 0:
+						pass
+					else:
+						all_good=True
 
 			if all_good:
+				self.packages_state_text.value='Checking packages: DONE'
+				self.packages_state_text.text_color='green'
 				print("done checking packages")
 			else:
 				new_data = subprocess.check_output(["pip", "list", "--format", "json"])
@@ -88,24 +104,88 @@ class UI_Shell:
 
 				for pack in nakama_dependency_list.packages:
 					if any(installed["name"] == pack[0] for installed in new_parsed_results): 
-						print(f"done checking {pack[0]}")
+						pass
 					else:
 						raise Exception(f"package {pack[0]} still missing, aborting install.")
-				print("done checking packages")
+				self.packages_state_text.value='Checking packages: FAILED'
+				self.packages_state_text.text_color='black'
+				print("failed packages install")
 		except Exception as e:
+			self.packages_state_text.value='Checking packages: FAILED'
+			self.packages_state_text.text_color='black'
 			print(e)
 			print("something wrong while checking packages, call for help!")
 
 	def check_libraries(self):
-		print("checking libraries")
 		try:
+			all_good=True
+			print("checking libraries")
 			for lib in nakama_dependency_list.libraries:
-				os.path.isdir(f"libraries/{lib}")
-			time.sleep(2)
+				if os.path.isdir(f"libraries/{lib}"):
+					print(f"done checking {lib}")
+				else:
+					print(f"couldn't find libraries {lib}, attempting download.")
+					cmd = f"git restore libraries/{lib}"
+					open_process = subprocess.Popen(shlex.split(cmd))
+					open_process.wait()
+					if open_process.returncode != 0:
+						all_good=False
+						print(f"failed to install {lib}")
+						try:
+							if os.path.isdir(f"libraries/{lib}"):
+								cmd = f"rmdir libraries/{lib} -r"
+								open_process = subprocess.Popen(shlex.split(cmd))
+								open_process.wait()
+						except Exception as e:
+							print(e)
+					else:
+						print(f"done installing {lib}")
+			if all_good:
+				self.libraries_state_text.value='Checking libraries: DONE'
+				self.libraries_state_text.text_color='green'
+				print("done checking libraries")
+			else:
+				self.libraries_state_text.value='Checking libraries: FAILED'
+				self.libraries_state_text.text_color='black'
+				print("failed libraries install")
 		except Exception as e:
+			self.libraries_state_text.value='Checking libraries: FAILED'
+			self.libraries_state_text.text_color='black'
 			print(e)
 			print("something wrong while checking libraries, call for help!")
-		print("done checking libraries")
+
+	def check_sensors(self):
+		try:
+			all_good=True
+			if all_good:
+				self.sensors_state_text.value='Checking sensors: DONE'
+				self.sensors_state_text.text_color='green'
+				print("done checking sensors")
+			else:
+				self.sensors_state_text.value='Checking sensors: FAILED'
+				self.sensors_state_text.text_color='black'
+		except Exception as e:
+			self.sensors_state_text.value='Checking sensors: FAILED'
+			self.sensors_state_text.text_color='black'
+			print(e)
+			print("something wrong while checking sensors, call for help!")
+
+	def check_database(self):
+		try:
+			all_good=True
+			if all_good:
+				self.database_state_text.value='Checking database: DONE'
+				self.database_state_text.text_color='green'
+				print("done checking database")
+			else:
+				self.database_state_text.value='Checking database: FAILED'
+				self.database_state_text.text_color='black'
+		except Exception as e:
+			self.database_state_text.value='Checking database: FAILED'
+			self.database_state_text.text_color='black'
+			print(e)
+			print("something wrong while checking database, call for help!")
+
 
 
 
