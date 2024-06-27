@@ -7,6 +7,7 @@ try:
 	import shlex
 	import nakama_dependency_list
 	import os
+	#test
 except Exception  as e:
 	print(e)
 	print("something went wrong with dependecies, check out the README file")
