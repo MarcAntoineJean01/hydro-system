@@ -1,0 +1,7 @@
+{
+    "DATABASE": "hydroponicdb",
+    "DB_HOST": "localhost",
+    "DB_PASSWORD": "nakamaDB",
+    "DB_PORT": "3306",
+    "DB_USER": "root"
+}

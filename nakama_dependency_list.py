@@ -1,0 +1,1 @@
+pacs = ["mysql-connector-python", "pushbullet.py"]
