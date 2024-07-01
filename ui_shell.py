@@ -15,7 +15,7 @@ class UI_Shell:
 
 	def __init__(self):
 		try:
-			self.app = App(title="My app", width=800, height=480)
+			self.app=App(title="My app", width=800, height=480)
 			self.app.full_screen=True if sys.platform == "RASP_PI" else False
 			self.welcome_screen()
 
@@ -29,15 +29,15 @@ class UI_Shell:
 	def welcome_screen(self):
 		self.title_box=TitleBox(self.app, text="Welcome", layout="auto", height='fill', width='fill')
 
-		welcome_text="Hello and welcome! press the start button to start up app, first we're going to make sure everything is set up to run smoothly!"
+		welcome_text="Hello and welcome!"
 		self.welcome_text=Text(self.title_box, text=welcome_text)
-		self.main_app_button=PushButton(self.title_box, self.check_screen, text='Start')
+		self.setup_button=PushButton(self.title_box, self.start_setup, text='Setup')
 		self.exit_button=PushButton(self.title_box, self.exit_app, text='Exit')
 
-	def check_screen(self):
+	def setup_screen(self):
 		self.title_box.destroy()
 
-		self.title_box=TitleBox(self.app, text="Start-up", layout="auto", height='fill', width='fill')
+		self.title_box=TitleBox(self.app, text="Setup", layout="auto", height='fill', width='fill')
 		self.packages_state_text=Text(self.title_box, text='Checking packages: WORKING', color='red', size=14)
 		self.libraries_state_text=Text(self.title_box, text='Checking libraries: WAITING', color='yellow', size=14)
 		self.sensors_state_text=Text(self.title_box, text='Checking sensors: WAITING', color='yellow', size=14)
@@ -66,8 +66,13 @@ class UI_Shell:
 
 		self.app.update()
 
-
-
+#POPUPS
+	def start_setup(self):
+		start_setup=self.app.yesno("Start Setup?", "You're about to start the setup. this process will check for missing libraries and packages and install them if needed.")
+		if start_setup == True:
+		    self.setup_screen()
+		else:
+		    pass
 
 #METHODS
 	def exit_app(self):
