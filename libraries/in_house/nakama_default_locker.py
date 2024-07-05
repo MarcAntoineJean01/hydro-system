@@ -8,3 +8,6 @@ DB_PASSWORD = "nakamaDB" #"nakama"
 DB_HOST = "localhost"
 DB_PORT = 3306
 DATABASE = "hydroponicdb"
+
+#sensors api
+SENSORS_URL = "https://postman-echo.com"

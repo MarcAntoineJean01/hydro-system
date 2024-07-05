@@ -13,8 +13,9 @@ except Exception  as e:
 	sys.exit()
 class UI_Shell:
 
-	def __init__(self):
+	def __init__(self, remote_sensors=False):
 		try:
+			self.remote_sensors=remote_sensors
 			self.app=App(title="My app", width=800, height=480)
 			self.app.full_screen=True if sys.platform == "RASP_PI" else False
 			self.welcome_screen()
@@ -65,6 +66,7 @@ class UI_Shell:
 		self.check_database()
 
 		self.app.update()
+		self.exit_app()
 
 #POPUPS
 	def start_setup(self):
@@ -149,6 +151,8 @@ class UI_Shell:
 				self.libraries_state_text.value='Checking libraries: DONE'
 				self.libraries_state_text.text_color='green'
 				print("done checking libraries")
+				print("appending in_house directory to sys.path")
+				sys.path.append('libraries/in_house')
 			else:
 				self.libraries_state_text.value='Checking libraries: FAILED'
 				self.libraries_state_text.text_color='black'
@@ -162,6 +166,19 @@ class UI_Shell:
 	def check_sensors(self):
 		try:
 			all_good=True
+			if self.remote_sensors:
+				#test sensors api
+				import sensors_api
+				# self.sensors_api=sensors_api.Sensors_Apis()
+				self.s_api=sensors_api.Sensors_Apis()
+				call=self.s_api.test_call()
+				if call is False:
+					all_good=False
+				else:
+					print("successfully tested sensors api")
+			else:
+				#test sensors on pie
+				pass
 			if all_good:
 				self.sensors_state_text.value='Checking sensors: DONE'
 				self.sensors_state_text.text_color='green'

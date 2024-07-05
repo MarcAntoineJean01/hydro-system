@@ -35,4 +35,4 @@
 
 import ui_shell
 
-ui_instance = ui_shell.UI_Shell()
+ui_instance = ui_shell.UI_Shell(True)
