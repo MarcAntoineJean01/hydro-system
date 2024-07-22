@@ -1,5 +1,5 @@
 import sys
-sys.path.append('libraries/in_house')
+sys.path.append('libraries_wip/in_house')
 if sys.platform == "linux" or sys.platform == "linux2":
 	# linux
 	pass
