@@ -3,6 +3,6 @@
     "DB_HOST": "localhost",
     "DB_PASSWORD": "nakamaDB",
     "DB_PORT": "3306",
-    "DB_USER": "root"
+    "DB_USER": "root",
     "SENSORS_ENDPOINT": "http://localhost:4567/"
 }
