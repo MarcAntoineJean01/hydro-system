@@ -44,11 +44,13 @@ This project is designed to support and automate a hydroponic system, managing g
 ### Running the Server
 To run the Ruby server, use:
    ```sh
+   cd server
    ruby nakama_server.rb
    ```
 ### Running the Controller and UI
 To run the Python controller and UI, use:
    ```sh
+   cd digital_controller
    python3 nakama_controller.py
    ```
 ## Development

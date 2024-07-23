@@ -45,58 +45,30 @@ class NakamaServerStartup
    begin
       require 'sinatra'
       require 'sinatra/base'
-
-      p "require 'sinatra' SUCCESS"
-   rescue LoadError => error
-      p error
-      p "failed to load sinatra, installing gems"
-      begin
-         sinatraInstall = system("gem install sinatra")
-         if !sinatraInstall
-            raise "GEM sinatra INSTALL FAILED"
-         end
-         rackupInstall = system("gem install rackup")
-         if ! rackupInstall
-            raise "GEM rackup INSTALL FAILED"
-         end
-         pumaInstall = system("gem install puma")
-         if !pumaInstall
-            raise "GEM puma INSTALL FAILED"
-         end
-         require 'sinatra'
-      rescue => error
-         p error
-         p "failed to install gems, ask for help"
-      rescue LoadError => error
-         p error
-         p "failed to load sinatra again, try restarting"
-      end
-   end
-
-   @instance_id = NakamaServerStartup.getId()
-
-   begin
       require 'arduino'
 
-      p "require 'arduino' SUCCESS"
+      p "require gems SUCCESS"
    rescue LoadError => error
       p error
-      p "failed to load arduino, installing gems"
+      p "failed to require gems, installing gems"
       begin
-         arduinoInstall = system("gem install arduino")
-         if !arduinoInstall
-            raise "GEM arduino INSTALL FAILED"
+         bundleInstall = system("bundle install")
+         if !bundleInstall
+            raise "bundle install FAILED"
          end
+         require 'sinatra'
+         require 'sinatra/base'
          require 'arduino'
       rescue => error
          p error
          p "failed to install gems, ask for help"
       rescue LoadError => error
          p error
-         p "failed to load arduino again, try restarting"
+         p "failed to require gems again, try restarting"
       end
    end
 
+   @instance_id = NakamaServerStartup.getId()
 
    begin
       Sinatra::Base.get '/test_call' do
